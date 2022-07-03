@@ -1,2 +1,5 @@
 # Build Folder
 build/
+
+# IDE Specific
+.vscode/
