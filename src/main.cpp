@@ -15,7 +15,24 @@ const char *fragmentShaderSource = "#version 330 core\n"
 								   "void main()\n"
 								   "{\n"
 								   "	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-								   "}\n";
+								   "}\n\0";
+
+const char *vertexShader2Source = "#version 330 core\n"
+								  "layout (location = 0) in vec3 aPos;\n"
+								  "out vec4 vertexColor;\n"
+								  "void main()\n"
+								  "{\n"
+								  "   gl_Position = vec4(aPos, 1.0);\n"
+								  "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
+								  "}\0";
+
+const char *fragmentShader2Source = "#version 330 core\n"
+									"out vec4 FragColor;\n"
+									"in vec4 vertexColor;\n"
+									"void main()\n"
+									"{\n"
+									"	FragColor = vertexColor;\n"
+									"}\n\0";
 
 // Resize OpenGL viewport when window size changed
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -141,6 +158,53 @@ int main()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragShader);
 
+	// Create second shader, using shader2
+	unsigned int vertexShader2;
+	vertexShader2 = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader2, 1, &vertexShader2Source, NULL);
+	glCompileShader(vertexShader2);
+
+	glGetShaderiv(vertexShader2, GL_COMPILE_STATUS, &vertexSuccess);
+	if (!vertexSuccess)
+	{
+		glGetShaderInfoLog(vertexShader2, 512, NULL, vertexInfoLog);
+		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
+				  << vertexInfoLog << std::endl;
+	}
+
+	// Fragment Shader
+	unsigned int fragShader2;
+	fragShader2 = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragShader2, 1, &fragmentShader2Source, NULL);
+	glCompileShader(fragShader2);
+
+	glGetShaderiv(fragShader2, GL_COMPILE_STATUS, &fragSuccess);
+	if (!fragSuccess)
+	{
+		glGetShaderInfoLog(fragShader2, 512, NULL, fragInfoLog);
+		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
+				  << fragInfoLog << std::endl;
+	}
+
+	unsigned int shaderProgram2;
+	shaderProgram2 = glCreateProgram();
+
+	// Attach Shaders to Program and Link together.
+	glAttachShader(shaderProgram2, vertexShader2);
+	glAttachShader(shaderProgram2, fragShader2);
+	glLinkProgram(shaderProgram2);
+
+	glGetProgramiv(shaderProgram2, GL_LINK_STATUS, &programSuccess);
+	if (!programSuccess)
+	{
+		glGetProgramInfoLog(shaderProgram2, 512, NULL, programInfoLog);
+		std::cout << "ERROR::PROGRAM::LINK__FAILED\n"
+				  << programInfoLog << std::endl;
+	}
+
+	glDeleteShader(vertexShader2);
+	glDeleteShader(fragShader2);
+
 	// Create a Vertex Buffer Object
 	// Special OpenGL object to hold vertex data
 	unsigned int VBO;
@@ -194,6 +258,9 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+	std::cout << "Maximum Vertex Attributes: " << GL_MAX_VERTEX_ATTRIBS << std::endl;
+
 	// Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -210,7 +277,7 @@ int main()
 		// Draw a triangle
 		// draw our first triangle
 		// Use the created shader program
-		glUseProgram(shaderProgram);
+		glUseProgram(shaderProgram2);
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		// glDrawArrays(GL_TRIANGLES, 0, 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
