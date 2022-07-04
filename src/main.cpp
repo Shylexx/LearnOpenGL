@@ -293,7 +293,8 @@ int main()
 		// glUseProgram(shaderProgram2);
 		myShader.use();
 		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
+		float xoffset = 0.5f;
+		myShader.setFloat("offsetX", xoffset);
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
