@@ -1,6 +1,8 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "Shader.h"
+
 #include <iostream>
 
 const char *vertexShaderSource = "#version 330 core\n"
@@ -98,6 +100,9 @@ int main()
 		0, 1, 3, // first Triangle
 		1, 2, 3	 // second Triangle
 	};
+
+	// Declare Shader using custom shader class
+	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.fs");
 
 	// Vertex Shader declared with an ID
 	unsigned int vertexShader;
@@ -285,7 +290,8 @@ int main()
 		// float timeValue = glfwGetTime();
 		// float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		// int vertexColorLocation = glGetUniformLocation(shaderProgram2, "unifColor");
-		glUseProgram(shaderProgram2);
+		// glUseProgram(shaderProgram2);
+		myShader.use();
 		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized

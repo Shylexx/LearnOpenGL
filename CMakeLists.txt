@@ -8,11 +8,14 @@ add_subdirectory(libs/glad)
 set(CMAKE_CXX_STANDARD 20)
 
 set(HEADER_FILES
-	#src/LearnOpenGL.h
+
+	# src/LearnOpenGL.h
+	src/Shader.h
 )
 
 set(SOURCE_FILES
-	#src/LearnOpenGL.cpp
+
+	# src/LearnOpenGL.cpp
 	src/main.cpp
 )
 
