@@ -19,19 +19,20 @@ const char *fragmentShaderSource = "#version 330 core\n"
 
 const char *vertexShader2Source = "#version 330 core\n"
 								  "layout (location = 0) in vec3 aPos;\n"
-								  "out vec4 vertexColor;\n"
+								  "layout (location = 1) in vec3 aColor;\n"
+								  "out vec3 ourColor;\n"
 								  "void main()\n"
 								  "{\n"
 								  "   gl_Position = vec4(aPos, 1.0);\n"
-								  "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);\n"
+								  "   ourColor = aColor;\n"
 								  "}\0";
 
 const char *fragmentShader2Source = "#version 330 core\n"
 									"out vec4 FragColor;\n"
-									"in vec4 vertexColor;\n"
+									"in vec3 ourColor;\n"
 									"void main()\n"
 									"{\n"
-									"	FragColor = vertexColor;\n"
+									"   FragColor = vec4(ourColor, 1.0f);\n"
 									"}\n\0";
 
 // Resize OpenGL viewport when window size changed
@@ -85,10 +86,10 @@ int main()
 
 	// Triangle Vertex Data
 	float vertices[] = {
-		0.5f, 0.5f, 0.0f,	// top right
-		0.5f, -0.5f, 0.0f,	// bottom right
-		-0.5f, -0.5f, 0.0f, // bottom left
-		-0.5f, 0.5f, 0.0f	// top left
+		// positions         // colors
+		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
+		0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f	  // top
 	};
 
 	// Indices for drawing a rect from two tris
@@ -244,8 +245,12 @@ int main()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// Tell OpenGL how to interpret Vertex Data
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 	// glVertexAttribPointer Params:
 	// Param 1: Which Vertex Attribute to configure
 	// Param 2: Size of vertex attribute, vec3 so its 3.
@@ -276,11 +281,16 @@ int main()
 
 		// Draw a triangle
 		// draw our first triangle
-		// Use the created shader program
+		// Change the color over time!
+		// float timeValue = glfwGetTime();
+		// float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+		// int vertexColorLocation = glGetUniformLocation(shaderProgram2, "unifColor");
 		glUseProgram(shaderProgram2);
+		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		// Swap Color Buffers
 		glfwSwapBuffers(window);
