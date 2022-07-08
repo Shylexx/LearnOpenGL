@@ -11,12 +11,14 @@ set(HEADER_FILES
 
 	# src/LearnOpenGL.h
 	src/Shader.h
+	src/stb_image/stb_image.h
 )
 
 set(SOURCE_FILES
 
 	# src/LearnOpenGL.cpp
 	src/main.cpp
+	src/stb_image/stb_image.cpp
 )
 
 add_executable(${PROJECT_NAME}
