@@ -2,6 +2,7 @@
 #include "GLFW/glfw3.h"
 
 #include "Shader.h"
+#include "stb_image/stb_image.h"
 
 #include <iostream>
 
@@ -88,10 +89,11 @@ int main()
 
 	// Triangle Vertex Data
 	float vertices[] = {
-		// positions         // colors
-		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
-		0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f	  // top
+		// positions          // colors           // texture coords
+		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,	  // top right
+		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+		-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f	  // top left
 	};
 
 	// Indices for drawing a rect from two tris
@@ -251,11 +253,14 @@ int main()
 
 	// Tell OpenGL how to interpret Vertex Data
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
+	// Texture mapping
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
 	// glVertexAttribPointer Params:
 	// Param 1: Which Vertex Attribute to configure
 	// Param 2: Size of vertex attribute, vec3 so its 3.
@@ -268,12 +273,84 @@ int main()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
+	// Flip images vertically when loaded, to keep the textures the expected orientation
+	stbi_set_flip_vertically_on_load(true);
+
+	// Create a openGl texture
+	unsigned int boxTexture;
+	glGenTextures(1, &boxTexture);
+
+	// Bind boxTexture to the GL_TEXTURE_2D
+	glBindTexture(GL_TEXTURE_2D, boxTexture);
+
+	// Configure some wrapping and filtering settings
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Load Texture Image
+	int width, height, nrChannels;
+	unsigned char *image1 = stbi_load("E:\\dev\\LearnOpenGL\\assets\\container.jpg", &width, &height, &nrChannels, 0);
+	if (image1)
+	{
+		// Make texture using loaded image asset
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image1);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture image" << std::endl;
+		std::cout << stbi_failure_reason() << std::endl;
+	}
+	stbi_image_free(image1);
+
+	unsigned int faceTexture;
+	glGenTextures(1, &faceTexture);
+
+	glBindTexture(GL_TEXTURE_2D, faceTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Load a second texture
+	unsigned char *image2 = stbi_load("E:\\dev\\LearnOpenGL\\assets\\awesomeface.png", &width, &height, &nrChannels, 0);
+	if (image2)
+	{
+		// Specify RGBA, as PNG has an alpha channel
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image2);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture image" << std::endl;
+		std::cout << stbi_failure_reason() << std::endl;
+	}
+	stbi_image_free(image2);
+
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "Maximum Vertex Attributes: " << GL_MAX_VERTEX_ATTRIBS << std::endl;
+
+	myShader.use();
+	// Set Longhand
+	glUniform1i(glGetUniformLocation(myShader.ID, "texture1"), 0);
+	// Or with shader class helper function
+	myShader.setInt("texture2", 1);
+
+	float deltaTime;
+	float lastFrameTime = 0.0f;
+
+	glfwSwapInterval(0);
 
 	// Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
+		deltaTime = glfwGetTime() - lastFrameTime;
+		lastFrameTime = glfwGetTime();
+
+		std::cout << "FPS: " << (1 / deltaTime) << std::endl;
 		// Process Key events
 		processInput(window);
 
@@ -291,13 +368,21 @@ int main()
 		// float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		// int vertexColorLocation = glGetUniformLocation(shaderProgram2, "unifColor");
 		// glUseProgram(shaderProgram2);
-		myShader.use();
+
 		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
 		float xoffset = 0.5f;
 		myShader.setFloat("offsetX", xoffset);
+
+		// Bind both textures to different texture units
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, boxTexture);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, faceTexture);
+
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		// Swap Color Buffers
 		glfwSwapBuffers(window);
