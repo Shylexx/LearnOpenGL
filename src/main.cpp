@@ -5,6 +5,7 @@
 #include "stb_image/stb_image.h"
 
 #include <iostream>
+#include <string>
 
 const char *vertexShaderSource = "#version 330 core\n"
 								 "layout (location = 0) in vec3 aPos;\n"
@@ -60,6 +61,10 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// Const Window Title for Showing FPS in window
+	const char *titleStr = "LearnOpenGL - FPS: ";
+	char windowTitle[80];
 
 	// Make a native glfw window.
 	GLFWwindow *window = glfwCreateWindow(800, 600, "LearnOpenGL", NULL, NULL);
@@ -339,19 +344,26 @@ int main()
 	// Or with shader class helper function
 	myShader.setInt("texture2", 1);
 
-	float deltaTime;
+	float deltaTime, fps;
 	float lastFrameTime = 0.0f;
 
-	glfwSwapInterval(0);
+	// Disables VSYNC
+	// glfwSwapInterval(0);
 
 	// Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
 		deltaTime = glfwGetTime() - lastFrameTime;
 		lastFrameTime = glfwGetTime();
+		fps = (1 / deltaTime);
 
-		std::cout << "FPS: " << (1 / deltaTime) << std::endl;
-		// Process Key events
+		// Show FPS in Window Title
+		memset(windowTitle, 0, sizeof windowTitle);
+		strcpy(windowTitle, titleStr);
+		strcat(windowTitle, std::to_string(fps).data());
+		glfwSetWindowTitle(window, windowTitle);
+
+		//  Process Key events
 		processInput(window);
 
 		// Render Commands go Here:
@@ -363,13 +375,13 @@ int main()
 
 		// Draw a triangle
 		// draw our first triangle
+
 		// Change the color over time!
 		// float timeValue = glfwGetTime();
 		// float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		// int vertexColorLocation = glGetUniformLocation(shaderProgram2, "unifColor");
-		// glUseProgram(shaderProgram2);
-
 		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
 		float xoffset = 0.5f;
 		myShader.setFloat("offsetX", xoffset);
 
