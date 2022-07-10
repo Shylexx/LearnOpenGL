@@ -113,7 +113,7 @@ int main()
 	};
 
 	// Declare Shader using custom shader class
-	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\transformshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.fs");
+	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.fs");
 
 	// Vertex Shader declared with an ID
 	unsigned int vertexShader;
@@ -397,31 +397,33 @@ int main()
 		// Clear the Color buffer
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// Draw a triangle
-		// draw our first triangle
-
-		// Change the color over time!
-		// float timeValue = glfwGetTime();
-		// float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-		// int vertexColorLocation = glGetUniformLocation(shaderProgram2, "unifColor");
-		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
-		glm::mat4 trans = glm::mat4(1.0f);
-		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
-		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-		// Apply Matrix Transform
-		unsigned int transformLoc = glGetUniformLocation(myShader.ID, "transform");
-		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-
-		float xoffset = 0.5f;
-		myShader.setFloat("offsetX", xoffset);
-
 		// Bind both textures to different texture units
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, boxTexture);
-
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, faceTexture);
+
+		myShader.use();
+
+		// Create transformations
+		// Model Matrix
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		// View Matrix
+		glm::mat4 view = glm::mat4(1.0f);
+		// note that we're translating the scene in the reverse direction of where we want to move
+		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		// Perspective Projection Matrix
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+		// Send Transform Matrices to shader
+		int modelLoc = glGetUniformLocation(myShader.ID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+		int viewLoc = glGetUniformLocation(myShader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+		int projLoc = glGetUniformLocation(myShader.ID, "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		// glDrawArrays(GL_TRIANGLES, 0, 3);
