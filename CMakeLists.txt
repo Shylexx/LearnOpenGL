@@ -12,6 +12,7 @@ set(HEADER_FILES
 	# src/LearnOpenGL.h
 	src/Shader.h
 	src/stb_image/stb_image.h
+	src/Camera.h
 )
 
 set(SOURCE_FILES
