@@ -21,6 +21,7 @@ glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 bool firstMouse = true;
 float yaw = -90.0f; // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
 float pitch = 0.0f;
+float fov = 45.0f;
 
 // Resize OpenGL viewport when window size changed
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -58,6 +59,15 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(direction);
+}
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+	fov -= (float)yoffset;
+	if (fov < 1.0f)
+		fov = 1.0f;
+	if (fov > 45.0f)
+		fov = 45.0f;
 }
 
 void processInput(GLFWwindow *window)
@@ -107,8 +117,10 @@ int main()
 	glfwMakeContextCurrent(window);
 	// Capture the Cursor
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	//
+	// Mouse movement callback
 	glfwSetCursorPosCallback(window, mouse_callback);
+	// Scroll callback
+	glfwSetScrollCallback(window, scroll_callback);
 
 	// Initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -320,10 +332,6 @@ int main()
 	// Disables VSYNC
 	glfwSwapInterval(0);
 
-	// Perspective Projection Matrix
-	glm::mat4 projection;
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-
 	// Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
@@ -337,6 +345,8 @@ int main()
 		strcpy(windowTitle, titleStr);
 		strcat(windowTitle, std::to_string(fps).data());
 		glfwSetWindowTitle(window, windowTitle);
+
+		std::cout << fov << std::endl;
 
 		//  Process Key events
 		processInput(window);
@@ -355,6 +365,9 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, faceTexture);
 
 		myShader.use();
+		// Perspective Projection Matrix
+		glm::mat4 projection;
+		projection = glm::perspective(glm::radians(fov), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// camera/view transformation
 		glm::mat4 view = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
