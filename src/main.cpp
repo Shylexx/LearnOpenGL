@@ -1,6 +1,10 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 #include "Shader.h"
 #include "stb_image/stb_image.h"
 
@@ -109,7 +113,7 @@ int main()
 	};
 
 	// Declare Shader using custom shader class
-	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.fs");
+	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\transformshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.fs");
 
 	// Vertex Shader declared with an ID
 	unsigned int vertexShader;
@@ -338,11 +342,31 @@ int main()
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "Maximum Vertex Attributes: " << GL_MAX_VERTEX_ATTRIBS << std::endl;
 
+	// Scaling and Rotating a rendered object
+	// 1) Scale the container by 0.5 on each axis
+	// 2) rotate the container 90 degrees around the Z
+	// 3) The axis we rotate around should be a unit vector (normalise it if you're not rotating around xyz axis)
+	// 4) Because We pass the matrix to the GLM functions, it automatically multiplies the matrices together.
+	// 5) glm::rotate and scale is multiplying trans by the resulting matrix from the transformation
+	glm::mat4 trans = glm::mat4(1.0f);
+
 	myShader.use();
+
 	// Set Longhand
 	glUniform1i(glGetUniformLocation(myShader.ID, "texture1"), 0);
 	// Or with shader class helper function
 	myShader.setInt("texture2", 1);
+
+	// Applying matrix transform to the vert shader.
+	// 1) Query the location of the uniform
+	// 2) Send the matrix data to the shaders using glUniform with Matrix4fv.
+	// unsigned int transformLoc = glGetUniformLocation(myShader.ID, "transform");
+	// glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+	// glUniformMatrix4v params:
+	// First Param: The uniform location
+	// Second Param: How many matrices we are sending (1)
+	// Third Param: If we want to transpose the matrix (swap columns and rows) GLM does column-major ordering by default
+	// Fourth param: the matrix data, value_ptr gets an OpenGL compatible version
 
 	float deltaTime, fps;
 	float lastFrameTime = 0.0f;
@@ -381,6 +405,13 @@ int main()
 		// float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
 		// int vertexColorLocation = glGetUniformLocation(shaderProgram2, "unifColor");
 		// glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
+		glm::mat4 trans = glm::mat4(1.0f);
+		trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.0f));
+		trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+		// Apply Matrix Transform
+		unsigned int transformLoc = glGetUniformLocation(myShader.ID, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
 
 		float xoffset = 0.5f;
 		myShader.setFloat("offsetX", xoffset);
