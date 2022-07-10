@@ -256,22 +256,19 @@ int main()
 	myShader.setInt("texture1", 0);
 	myShader.setInt("texture2", 1);
 
-	// Applying matrix transform to the vert shader.
-	// 1) Query the location of the uniform
-	// 2) Send the matrix data to the shaders using glUniform with Matrix4fv.
-	// unsigned int transformLoc = glGetUniformLocation(myShader.ID, "transform");
-	// glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
-	// glUniformMatrix4v params:
-	// First Param: The uniform location
-	// Second Param: How many matrices we are sending (1)
-	// Third Param: If we want to transpose the matrix (swap columns and rows) GLM does column-major ordering by default
-	// Fourth param: the matrix data, value_ptr gets an OpenGL compatible version
-
 	float deltaTime, fps;
 	float lastFrameTime = 0.0f;
 
 	// Disables VSYNC
 	// glfwSwapInterval(0);
+
+	// Camera setup
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+	glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+	glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
 
 	// Render Loop
 	while (!glfwWindowShouldClose(window))
@@ -311,18 +308,23 @@ int main()
 		// model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		// Rotating over time
 		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-		// View Matrix
-		glm::mat4 view = glm::mat4(1.0f);
-		// note that we're translating the scene in the reverse direction of where we want to move
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
 		// Perspective Projection Matrix
 		glm::mat4 projection;
 		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// Send Transform Matrices to shader
 		myShader.setMat4("model", model);
-		myShader.setMat4("view", view);
+
 		myShader.setMat4("projection", projection);
+
+		// camera/view transformation
+		glm::mat4 view = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
+		float radius = 10.0f;
+		float camX = static_cast<float>(sin(glfwGetTime()) * radius);
+		float camZ = static_cast<float>(cos(glfwGetTime()) * radius);
+		view = glm::lookAt(glm::vec3(camX, 0.0f, camZ), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		myShader.setMat4("view", view);
 
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		for (unsigned int i = 0; i < 10; i++)
@@ -335,7 +337,7 @@ int main()
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-				// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		// Swap Color Buffers
 		glfwSwapBuffers(window);
