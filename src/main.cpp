@@ -11,38 +11,6 @@
 #include <iostream>
 #include <string>
 
-const char *vertexShaderSource = "#version 330 core\n"
-								 "layout (location = 0) in vec3 aPos;\n"
-								 "void main()\n"
-								 "{\n"
-								 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-								 "}\0";
-
-const char *fragmentShaderSource = "#version 330 core\n"
-								   "out vec4 FragColor;\n"
-								   "void main()\n"
-								   "{\n"
-								   "	FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-								   "}\n\0";
-
-const char *vertexShader2Source = "#version 330 core\n"
-								  "layout (location = 0) in vec3 aPos;\n"
-								  "layout (location = 1) in vec3 aColor;\n"
-								  "out vec3 ourColor;\n"
-								  "void main()\n"
-								  "{\n"
-								  "   gl_Position = vec4(aPos, 1.0);\n"
-								  "   ourColor = aColor;\n"
-								  "}\0";
-
-const char *fragmentShader2Source = "#version 330 core\n"
-									"out vec4 FragColor;\n"
-									"in vec3 ourColor;\n"
-									"void main()\n"
-									"{\n"
-									"   FragColor = vec4(ourColor, 1.0f);\n"
-									"}\n\0";
-
 // Resize OpenGL viewport when window size changed
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -84,6 +52,7 @@ int main()
 	// Make window the current opengl context
 	glfwMakeContextCurrent(window);
 
+	// Initialise GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 		std::cout << "Failed to init GLAD" << std::endl;
@@ -96,14 +65,52 @@ int main()
 	// Register function for when Frame Buffer (window) changes size
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
+	glEnable(GL_DEPTH_TEST);
+
 	// Triangle Vertex Data
+
 	float vertices[] = {
-		// positions          // colors           // texture coords
-		0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,	  // top right
-		0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-		-0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f	  // top left
-	};
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+
+		-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+		-0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+		-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+		0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+		0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+		-0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+		-0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
 
 	// Indices for drawing a rect from two tris
 	unsigned int indices[] = {
@@ -113,114 +120,7 @@ int main()
 	};
 
 	// Declare Shader using custom shader class
-	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\basicshader.fs");
-
-	// Vertex Shader declared with an ID
-	unsigned int vertexShader;
-	vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-	// Specify GLSL Source for Shader
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	// Compile Vertex Shader
-	glCompileShader(vertexShader);
-
-	// Check for Shader Compile Errors
-	int vertexSuccess;
-	char vertexInfoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexSuccess);
-	if (!vertexSuccess)
-	{
-		glGetShaderInfoLog(vertexShader, 512, NULL, vertexInfoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-				  << vertexInfoLog << std::endl;
-	}
-
-	// Fragment Shader
-	unsigned int fragShader;
-	fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragShader);
-
-	int fragSuccess;
-	char fragInfoLog[512];
-	glGetShaderiv(fragShader, GL_COMPILE_STATUS, &fragSuccess);
-	if (!fragSuccess)
-	{
-		glGetShaderInfoLog(fragShader, 512, NULL, fragInfoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-				  << fragInfoLog << std::endl;
-	}
-
-	// Shader Program Object
-	// Final Linked version of Multiple Shaders combined
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram();
-
-	// Attach Shaders to Program and Link together.
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragShader);
-	glLinkProgram(shaderProgram);
-
-	int programSuccess;
-	char programInfoLog[512];
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &programSuccess);
-	if (!programSuccess)
-	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, programInfoLog);
-		std::cout << "ERROR::PROGRAM::LINK__FAILED\n"
-				  << programInfoLog << std::endl;
-	}
-
-	// Delete Shaders (Once Linked, single objects no longer needed)
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragShader);
-
-	// Create second shader, using shader2
-	unsigned int vertexShader2;
-	vertexShader2 = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader2, 1, &vertexShader2Source, NULL);
-	glCompileShader(vertexShader2);
-
-	glGetShaderiv(vertexShader2, GL_COMPILE_STATUS, &vertexSuccess);
-	if (!vertexSuccess)
-	{
-		glGetShaderInfoLog(vertexShader2, 512, NULL, vertexInfoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-				  << vertexInfoLog << std::endl;
-	}
-
-	// Fragment Shader
-	unsigned int fragShader2;
-	fragShader2 = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragShader2, 1, &fragmentShader2Source, NULL);
-	glCompileShader(fragShader2);
-
-	glGetShaderiv(fragShader2, GL_COMPILE_STATUS, &fragSuccess);
-	if (!fragSuccess)
-	{
-		glGetShaderInfoLog(fragShader2, 512, NULL, fragInfoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-				  << fragInfoLog << std::endl;
-	}
-
-	unsigned int shaderProgram2;
-	shaderProgram2 = glCreateProgram();
-
-	// Attach Shaders to Program and Link together.
-	glAttachShader(shaderProgram2, vertexShader2);
-	glAttachShader(shaderProgram2, fragShader2);
-	glLinkProgram(shaderProgram2);
-
-	glGetProgramiv(shaderProgram2, GL_LINK_STATUS, &programSuccess);
-	if (!programSuccess)
-	{
-		glGetProgramInfoLog(shaderProgram2, 512, NULL, programInfoLog);
-		std::cout << "ERROR::PROGRAM::LINK__FAILED\n"
-				  << programInfoLog << std::endl;
-	}
-
-	glDeleteShader(vertexShader2);
-	glDeleteShader(fragShader2);
+	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.fs");
 
 	// Create a Vertex Buffer Object
 	// Special OpenGL object to hold vertex data
@@ -262,14 +162,11 @@ int main()
 
 	// Tell OpenGL how to interpret Vertex Data
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
-	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
 	// Texture mapping
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 	// glVertexAttribPointer Params:
 	// Param 1: Which Vertex Attribute to configure
 	// Param 2: Size of vertex attribute, vec3 so its 3.
@@ -342,19 +239,9 @@ int main()
 	std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
 	std::cout << "Maximum Vertex Attributes: " << GL_MAX_VERTEX_ATTRIBS << std::endl;
 
-	// Scaling and Rotating a rendered object
-	// 1) Scale the container by 0.5 on each axis
-	// 2) rotate the container 90 degrees around the Z
-	// 3) The axis we rotate around should be a unit vector (normalise it if you're not rotating around xyz axis)
-	// 4) Because We pass the matrix to the GLM functions, it automatically multiplies the matrices together.
-	// 5) glm::rotate and scale is multiplying trans by the resulting matrix from the transformation
-	glm::mat4 trans = glm::mat4(1.0f);
-
 	myShader.use();
 
-	// Set Longhand
-	glUniform1i(glGetUniformLocation(myShader.ID, "texture1"), 0);
-	// Or with shader class helper function
+	myShader.setInt("texture1", 0);
 	myShader.setInt("texture2", 1);
 
 	// Applying matrix transform to the vert shader.
@@ -394,8 +281,8 @@ int main()
 
 		// Color to clear the screen with
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-		// Clear the Color buffer
-		glClear(GL_COLOR_BUFFER_BIT);
+		// Clear the Color buffer and depth buffer
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Bind both textures to different texture units
 		glActiveTexture(GL_TEXTURE0);
@@ -408,7 +295,10 @@ int main()
 		// Create transformations
 		// Model Matrix
 		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		// Stationary Model
+		// model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		// Rotating over time
+		model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 		// View Matrix
 		glm::mat4 view = glm::mat4(1.0f);
 		// note that we're translating the scene in the reverse direction of where we want to move
@@ -418,16 +308,13 @@ int main()
 		projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
 		// Send Transform Matrices to shader
-		int modelLoc = glGetUniformLocation(myShader.ID, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-		int viewLoc = glGetUniformLocation(myShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-		int projLoc = glGetUniformLocation(myShader.ID, "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		myShader.setMat4("model", model);
+		myShader.setMat4("view", view);
+		myShader.setMat4("projection", projection);
 
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		// glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		// Swap Color Buffers
 		glfwSwapBuffers(window);
