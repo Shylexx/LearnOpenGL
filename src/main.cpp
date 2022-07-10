@@ -202,8 +202,8 @@ int main()
 		glm::vec3(-1.3f, 1.0f, -1.5f)};
 
 	// Declare Shader using custom shader class
-	Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.fs");
-
+	// Shader myShader("E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.vs", "E:\\dev\\LearnOpenGL\\src\\shaders\\coordinateshader.fs");
+	Shader myShader("shaders\\coordinateshader.vs", "shaders\\coordinateshader.fs");
 	// Create a Vertex Buffer Object
 	// Special OpenGL object to hold vertex data
 	unsigned int VBO;
@@ -279,7 +279,8 @@ int main()
 
 	// Load Texture Image
 	int width, height, nrChannels;
-	unsigned char *image1 = stbi_load("E:\\dev\\LearnOpenGL\\assets\\container.jpg", &width, &height, &nrChannels, 0);
+	unsigned char *image1 = stbi_load("assets\\container.jpg", &width, &height, &nrChannels, 0);
+	// unsigned char *image1 = stbi_load("E:\\dev\\LearnOpenGL\\assets\\container.jpg", &width, &height, &nrChannels, 0);
 	if (image1)
 	{
 		// Make texture using loaded image asset
@@ -304,7 +305,8 @@ int main()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Load a second texture
-	unsigned char *image2 = stbi_load("E:\\dev\\LearnOpenGL\\assets\\awesomeface.png", &width, &height, &nrChannels, 0);
+	// unsigned char *image2 = stbi_load("E:\\dev\\LearnOpenGL\\assets\\awesomeface.png", &width, &height, &nrChannels, 0);
+	unsigned char *image2 = stbi_load("assets\\awesomeface.png", &width, &height, &nrChannels, 0);
 	if (image2)
 	{
 		// Specify RGBA, as PNG has an alpha channel
@@ -345,8 +347,6 @@ int main()
 		strcpy(windowTitle, titleStr);
 		strcat(windowTitle, std::to_string(fps).data());
 		glfwSetWindowTitle(window, windowTitle);
-
-		std::cout << fov << std::endl;
 
 		//  Process Key events
 		processInput(window);
