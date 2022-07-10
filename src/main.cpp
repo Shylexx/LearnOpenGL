@@ -11,7 +11,8 @@
 #include <iostream>
 #include <string>
 
-const float cameraSpeed = 0.05f; // adjust
+float deltaTime, fps;
+
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -24,6 +25,8 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 
 void processInput(GLFWwindow *window)
 {
+	const float cameraSpeed = 2.5f * deltaTime; // adjust
+
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
@@ -270,11 +273,11 @@ int main()
 	myShader.setInt("texture1", 0);
 	myShader.setInt("texture2", 1);
 
-	float deltaTime, fps;
-	float lastFrameTime = 0.0f;
+	float currentFrame = 0.0f;
+	float lastFrame = 0.0f;
 
 	// Disables VSYNC
-	// glfwSwapInterval(0);
+	glfwSwapInterval(0);
 
 	// Perspective Projection Matrix
 	glm::mat4 projection;
@@ -283,8 +286,9 @@ int main()
 	// Render Loop
 	while (!glfwWindowShouldClose(window))
 	{
-		deltaTime = glfwGetTime() - lastFrameTime;
-		lastFrameTime = glfwGetTime();
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 		fps = (1 / deltaTime);
 
 		// Show FPS in Window Title
